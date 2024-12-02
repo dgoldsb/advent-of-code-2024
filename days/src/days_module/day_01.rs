@@ -9,7 +9,7 @@ impl Day for Day01 {
     }
 
     fn part_a(&self, input: &String) -> String {
-        let mut input_iterator = input.split("\n");
+        let input_iterator = input.split("\n");
 
         let mut series_a = Vec::new();
         let mut series_b = Vec::new();
@@ -32,7 +32,7 @@ impl Day for Day01 {
     }
 
     fn part_b(&self, input: &String) -> String {
-        let mut input_iterator = input.split("\n");
+        let input_iterator = input.split("\n");
 
         let mut map_a = HashMap::new();
         let mut map_b = HashMap::new();

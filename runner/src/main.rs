@@ -38,7 +38,7 @@ fn execute_day(day: &Box<dyn Day>) -> Result<(String, String), String> {
     let input = input_result.unwrap();
     let solution_a = day.part_a(&input);
     let solution_b = day.part_b(&input);
-    return Ok((solution_a, solution_b));
+    Ok((solution_a, solution_b))
 }
 
 fn main() {
