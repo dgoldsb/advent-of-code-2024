@@ -37,6 +37,10 @@ impl Day for Day02 {
         "day_02".to_string()
     }
 
+    fn get_index(&self) -> u8 {
+        2
+    }
+
     fn part_a(&self, input: &String) -> String {
         let input_iterator = input.split("\n");
         let mut safe_count = 0;

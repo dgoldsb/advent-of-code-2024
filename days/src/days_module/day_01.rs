@@ -8,6 +8,10 @@ impl Day for Day01 {
         "day_01".to_string()
     }
 
+    fn get_index(&self) -> u8 {
+        1
+    }
+
     fn part_a(&self, input: &String) -> String {
         let input_iterator = input.split("\n");
 

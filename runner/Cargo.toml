@@ -8,3 +8,4 @@ edition = "2021"
 [dependencies]
 days = { path = "../days" }
 helpers = { path = "../helpers" }
+tokio = { version = "1.41.1", features = ["full"] }

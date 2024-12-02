@@ -24,24 +24,23 @@ use days::days_module::day_22::Day22;
 use days::days_module::day_23::Day23;
 use days::days_module::day_24::Day24;
 use days::days_module::day_25::Day25;
-use helpers::read_file;
+use helpers::fetch_input_with_cache;
+use helpers::submit_answer;
 use std::time::Instant;
+use tokio;
 
-fn execute_day(day: &Box<dyn Day>) -> Result<(String, String), String> {
-    // Get the input for this day.
-    let input_result = read_file(day.get_id());
-
-    if input_result.is_err() {
-        return Err("Expected input file to be present".to_string());
-    }
-
-    let input = input_result.unwrap();
+async fn execute_day(day: &Box<dyn Day>) -> Result<(String, String), Box<dyn std::error::Error>> {
+    let input = fetch_input_with_cache(2024, day.get_index()).await?;
+    let day_index = day.get_index();
     let solution_a = day.part_a(&input);
+    submit_answer(2024, day_index, 1, &solution_a).await?;
     let solution_b = day.part_b(&input);
+    submit_answer(2024, day_index, 2, &solution_b).await?;
     Ok((solution_a, solution_b))
 }
 
-fn main() {
+#[tokio::main]
+async fn main() {
     let mut days: Vec<Box<dyn Day>> = Vec::new();
     days.push(Box::new(Day01 {}));
     days.push(Box::new(Day02 {}));
@@ -79,7 +78,9 @@ fn main() {
         let now = Instant::now();
 
         // Run the parts.
-        let solutions = execute_day(&day).unwrap_or_else(|_| ("".to_string(), "".to_string()));
+        let solutions = execute_day(&day)
+            .await
+            .unwrap_or_else(|_| ("".to_string(), "".to_string()));
 
         let runtime = format!(
             "{}.{} ms",

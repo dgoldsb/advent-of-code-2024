@@ -2,6 +2,7 @@ use helpers::read_file;
 
 pub trait Day {
     fn get_id(&self) -> String;
+    fn get_index(&self) -> u8;
 
     // An Advent of Code day consists of two parts: A and B.
     fn part_a(&self, input: &String) -> String;
