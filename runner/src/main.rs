@@ -78,9 +78,7 @@ async fn main() {
         let now = Instant::now();
 
         // Run the parts.
-        let solutions = execute_day(&day)
-            .await
-            .unwrap_or_else(|_| ("".to_string(), "".to_string()));
+        let solutions = execute_day(&day).await.unwrap();
 
         let runtime = format!(
             "{}.{} ms",
