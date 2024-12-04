@@ -48,7 +48,35 @@ impl Day for Day04 {
     }
 
     fn part_b(&self, input: &String) -> String {
-        "".to_string()
+        let input_bytes = input.as_bytes();
+        let line_length: isize = input.find('\n').unwrap() as isize + 1;
+        let mut count = 0;
+
+        for flip in vec![1, -1] {
+            for flipx in vec![1, -1] {
+                for i in 0..input.len() {
+                    let a = *input_bytes.get(i).unwrap_or(&0) as char;
+                    // Let negative isize overflow because YOLO.
+                    let m = *input_bytes
+                        .get((i as isize + -1 * flip * (line_length + 1)) as usize)
+                        .unwrap_or(&0u8) as char;
+                    let s = *input_bytes
+                        .get((i as isize + flip * (line_length + 1)) as usize)
+                        .unwrap_or(&0u8) as char;
+                    let mx = *input_bytes
+                        .get((i as isize + flipx * (line_length - 1)) as usize)
+                        .unwrap_or(&0u8) as char;
+                    let sx = *input_bytes
+                        .get((i as isize + -1 * flipx * (line_length - 1)) as usize)
+                        .unwrap_or(&0u8) as char;
+                    if m == 'M' && a == 'A' && s == 'S' && mx == 'M' && sx == 'S' {
+                        count += 1;
+                    }
+                }
+            }
+        }
+
+        count.to_string()
     }
 }
 
