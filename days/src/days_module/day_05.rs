@@ -14,7 +14,7 @@ fn parse_rules(input: &str) -> Vec<(usize, usize)> {
     rules
 }
 
-fn is_valid_update(update: &Vec<usize>, rules: &Vec<(usize, usize)>) -> bool {
+fn is_valid_update(update: &Vec<usize>, rules: &Vec<(usize, usize)>) -> Option<(usize, usize)> {
     let mut seen_set = HashSet::new();
     seen_set.insert(usize::MAX);
 
@@ -25,17 +25,29 @@ fn is_valid_update(update: &Vec<usize>, rules: &Vec<(usize, usize)>) -> bool {
         }
     }
 
+    let mut i = 0;
     for page in update {
         for rule in rules {
             if rule.0 == *page && !seen_set.contains(&rule.1) {
-                return false;
+                return Some((i, update.iter().position(|&x| x == rule.1).unwrap()));
             }
         }
 
         seen_set.insert(*page);
+        i += 1;
     }
 
-    true
+    None
+}
+
+fn fix_update(update: Vec<usize>, rules: &Vec<(usize, usize)>) -> Vec<usize> {
+    let mut new_update = update.clone();
+    while is_valid_update(&new_update, rules) != None {
+        let offending_index = is_valid_update(&new_update, rules).unwrap();
+        new_update.swap(offending_index.0, offending_index.1);
+    }
+
+    new_update
 }
 
 impl Day for Day05 {
@@ -57,7 +69,7 @@ impl Day for Day05 {
                 .split(",")
                 .map(|x| x.parse::<usize>().unwrap())
                 .collect::<Vec<_>>();
-            if is_valid_update(&update, &rules) {
+            if is_valid_update(&update, &rules) == None {
                 count += update[update.len() / 2];
             }
         }
@@ -66,7 +78,29 @@ impl Day for Day05 {
     }
 
     fn part_b(&self, input: &String) -> String {
-        "".to_string()
+        let mut iterator = input.split("\n\n");
+        let rules = parse_rules(iterator.next().unwrap());
+
+        let mut count = 0;
+
+        for raw_update in iterator.next().unwrap().lines() {
+            let update = raw_update
+                .split(",")
+                .map(|x| x.parse::<usize>().unwrap())
+                .collect::<Vec<_>>();
+
+            if is_valid_update(&update, &rules) == None {
+                continue;
+            }
+
+            let fixed_update = fix_update(update, &rules);
+
+            if is_valid_update(&fixed_update, &rules) == None {
+                count += fixed_update[fixed_update.len() / 2];
+            }
+        }
+
+        count.to_string()
     }
 }
 
