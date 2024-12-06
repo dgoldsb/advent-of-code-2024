@@ -46,7 +46,46 @@ impl Day for Day06 {
     }
 
     fn part_b(&self, input: &String) -> String {
-        "".to_string()
+        let grid = Grid::from_str(input).unwrap();
+        let deltas = vec![(-1, 0), (0, 1), (1, 0), (0, -1)];
+        let mut counter = 0;
+
+        for override_cell in grid.iter() {
+            let mut delta_index = 0;
+            let mut guard = grid.find_index(&'^').unwrap();
+            let mut visited = HashSet::new();
+
+            visited.insert((guard.x, guard.y, delta_index));
+            loop {
+                let mut target_cell = grid.get_cell(&GridIndex {
+                    x: guard.x + deltas.get(delta_index).unwrap().0,
+                    y: guard.y + deltas.get(delta_index).unwrap().1,
+                });
+                match target_cell {
+                    Some(cell) => match cell.value {
+                        '.' => {
+                            if cell.index != override_cell.index {
+                                guard = &cell.index;
+                            } else {
+                                delta_index = (delta_index + 1) % deltas.len();
+                            }
+                        }
+                        '#' => delta_index = (delta_index + 1) % deltas.len(),
+                        '^' => guard = &cell.index,
+                        _ => break,
+                    },
+                    None => break,
+                }
+
+                if visited.contains(&(guard.x, guard.y, delta_index)) {
+                    counter += 1;
+                    break;
+                }
+                visited.insert((guard.x, guard.y, delta_index));
+            }
+        }
+
+        counter.to_string()
     }
 }
 
