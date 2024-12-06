@@ -10,15 +10,13 @@ pub struct Day06 {}
 fn exit_stage<'a>(
     grid: &'a Grid,
     override_index: Option<&'a GridIndex>,
-) -> Option<HashSet<&'a GridIndex>> {
+) -> Option<HashSet<(&'a GridIndex, usize)>> {
     let deltas = vec![(-1, 0), (0, 1), (1, 0), (0, -1)];
     let mut delta_index = 0;
     let mut guard = grid.find_index(&'^').unwrap();
     let mut visited_states = HashSet::new();
-    let mut visited_cells = HashSet::new();
+    visited_states.insert((guard, delta_index));
 
-    visited_cells.insert(guard);
-    visited_states.insert((guard.x, guard.y, delta_index));
     loop {
         let target_cell = grid.get_cell(&GridIndex {
             x: guard.x + deltas.get(delta_index).unwrap().0,
@@ -41,14 +39,13 @@ fn exit_stage<'a>(
             None => break,
         }
 
-        if visited_states.contains(&(guard.x, guard.y, delta_index)) {
+        if visited_states.contains(&(guard, delta_index)) {
             return None;
         }
 
-        visited_cells.insert(guard);
-        visited_states.insert((guard.x, guard.y, delta_index));
+        visited_states.insert((guard, delta_index));
     }
-    Some(visited_cells)
+    Some(visited_states)
 }
 
 impl Day for Day06 {
@@ -63,6 +60,9 @@ impl Day for Day06 {
     fn part_a(&self, input: &String) -> String {
         exit_stage(&Grid::from_str(input).unwrap(), None)
             .unwrap()
+            .iter()
+            .map(|t| t.0)
+            .collect::<HashSet<&GridIndex>>()
             .len()
             .to_string()
     }
@@ -71,8 +71,11 @@ impl Day for Day06 {
         let grid = Grid::from_str(input).unwrap();
         exit_stage(&grid, None)
             .unwrap()
+            .iter()
+            .map(|t| t.0)
+            .collect::<HashSet<&GridIndex>>()
             .par_iter()
-            .map(|i| exit_stage(&grid, Some(*i)))
+            .map(|i| exit_stage(&grid, Some(i)))
             .filter(|o| o.is_none())
             .count()
             .to_string()
