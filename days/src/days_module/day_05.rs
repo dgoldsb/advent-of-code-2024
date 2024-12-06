@@ -1,4 +1,5 @@
 use crate::days_module::day::Day;
+use rayon::prelude::*;
 use std::collections::HashSet;
 
 pub struct Day05 {}
@@ -63,45 +64,53 @@ impl Day for Day05 {
         let mut iterator = input.split("\n\n");
         let rules = parse_rules(iterator.next().unwrap());
 
-        let mut count = 0;
-
-        for raw_update in iterator.next().unwrap().lines() {
-            let update = raw_update
-                .split(",")
-                .map(|x| x.parse::<usize>().unwrap())
-                .collect::<Vec<_>>();
-            if is_valid_update(&update, &rules) == None {
-                count += update[update.len() / 2];
-            }
-        }
-
-        count.to_string()
+        iterator
+            .next()
+            .unwrap()
+            .lines()
+            .map(|raw_update| {
+                let update = raw_update
+                    .split(",")
+                    .map(|x| x.parse::<usize>().unwrap())
+                    .collect::<Vec<_>>();
+                if is_valid_update(&update, &rules) == None {
+                    update[update.len() / 2]
+                } else {
+                    0
+                }
+            })
+            .sum::<usize>()
+            .to_string()
     }
 
     fn part_b(&self, input: &String) -> String {
         let mut iterator = input.split("\n\n");
         let rules = parse_rules(iterator.next().unwrap());
 
-        let mut count = 0;
+        iterator
+            .next()
+            .unwrap()
+            .par_lines()
+            .map(|raw_update| {
+                let update = raw_update
+                    .split(",")
+                    .map(|x| x.parse::<usize>().unwrap())
+                    .collect::<Vec<_>>();
 
-        for raw_update in iterator.next().unwrap().lines() {
-            let update = raw_update
-                .split(",")
-                .map(|x| x.parse::<usize>().unwrap())
-                .collect::<Vec<_>>();
+                if is_valid_update(&update, &rules) == None {
+                    0
+                } else {
+                    let fixed_update = fix_update(update, &rules);
 
-            if is_valid_update(&update, &rules) == None {
-                continue;
-            }
-
-            let fixed_update = fix_update(update, &rules);
-
-            if is_valid_update(&fixed_update, &rules) == None {
-                count += fixed_update[fixed_update.len() / 2];
-            }
-        }
-
-        count.to_string()
+                    if is_valid_update(&fixed_update, &rules) == None {
+                        fixed_update[fixed_update.len() / 2]
+                    } else {
+                        0
+                    }
+                }
+            })
+            .sum::<usize>()
+            .to_string()
     }
 }
 
