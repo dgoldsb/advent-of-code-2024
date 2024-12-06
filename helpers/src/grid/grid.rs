@@ -5,7 +5,7 @@ use std::str::FromStr;
 
 pub struct Grid {
     cells: Vec<Cell>,
-    dimensions: (isize, isize),
+    pub dimensions: (isize, isize),
 }
 
 impl Grid {
