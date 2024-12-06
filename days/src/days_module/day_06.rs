@@ -1,11 +1,55 @@
 use crate::days_module::day::Day;
-use helpers::grid::cell::Cell;
 use helpers::grid::grid::Grid;
 use helpers::grid::grid_index::GridIndex;
+use rayon::prelude::*;
 use std::collections::HashSet;
 use std::str::FromStr;
 
 pub struct Day06 {}
+
+fn exit_stage<'a>(
+    grid: &'a Grid,
+    override_index: Option<&'a GridIndex>,
+) -> Option<HashSet<&'a GridIndex>> {
+    let deltas = vec![(-1, 0), (0, 1), (1, 0), (0, -1)];
+    let mut delta_index = 0;
+    let mut guard = grid.find_index(&'^').unwrap();
+    let mut visited_states = HashSet::new();
+    let mut visited_cells = HashSet::new();
+
+    visited_cells.insert(guard);
+    visited_states.insert((guard.x, guard.y, delta_index));
+    loop {
+        let target_cell = grid.get_cell(&GridIndex {
+            x: guard.x + deltas.get(delta_index).unwrap().0,
+            y: guard.y + deltas.get(delta_index).unwrap().1,
+        });
+
+        match target_cell {
+            Some(cell) => match cell.value {
+                '.' => {
+                    if override_index.is_none() || cell.index != *override_index.unwrap() {
+                        guard = &cell.index;
+                    } else {
+                        delta_index = (delta_index + 1) % deltas.len();
+                    }
+                }
+                '#' => delta_index = (delta_index + 1) % deltas.len(),
+                '^' => guard = &cell.index,
+                _ => break,
+            },
+            None => break,
+        }
+
+        if visited_states.contains(&(guard.x, guard.y, delta_index)) {
+            return None;
+        }
+
+        visited_cells.insert(guard);
+        visited_states.insert((guard.x, guard.y, delta_index));
+    }
+    Some(visited_cells)
+}
 
 impl Day for Day06 {
     fn get_id(&self) -> String {
@@ -15,77 +59,23 @@ impl Day for Day06 {
     fn get_index(&self) -> u8 {
         6
     }
+
     fn part_a(&self, input: &String) -> String {
-        let grid = Grid::from_str(input).unwrap();
-        let deltas = vec![(-1, 0), (0, 1), (1, 0), (0, -1)];
-        let mut delta_index = 0;
-        let mut guard = grid.find_index(&'^').unwrap();
-        let mut visited = HashSet::new();
-
-        visited.insert((guard.x, guard.y));
-
-        loop {
-            let target_cell = grid.get_cell(&GridIndex {
-                x: guard.x + deltas.get(delta_index).unwrap().0,
-                y: guard.y + deltas.get(delta_index).unwrap().1,
-            });
-
-            match target_cell {
-                Some(cell) => match cell.value {
-                    '.' => guard = &cell.index,
-                    '#' => delta_index = (delta_index + 1) % deltas.len(),
-                    '^' => guard = &cell.index,
-                    _ => break,
-                },
-                None => break,
-            }
-            visited.insert((guard.x, guard.y));
-        }
-
-        visited.len().to_string()
+        exit_stage(&Grid::from_str(input).unwrap(), None)
+            .unwrap()
+            .len()
+            .to_string()
     }
 
     fn part_b(&self, input: &String) -> String {
         let grid = Grid::from_str(input).unwrap();
-        let deltas = vec![(-1, 0), (0, 1), (1, 0), (0, -1)];
-        let mut counter = 0;
-
-        for override_cell in grid.iter() {
-            let mut delta_index = 0;
-            let mut guard = grid.find_index(&'^').unwrap();
-            let mut visited = HashSet::new();
-
-            visited.insert((guard.x, guard.y, delta_index));
-            loop {
-                let mut target_cell = grid.get_cell(&GridIndex {
-                    x: guard.x + deltas.get(delta_index).unwrap().0,
-                    y: guard.y + deltas.get(delta_index).unwrap().1,
-                });
-                match target_cell {
-                    Some(cell) => match cell.value {
-                        '.' => {
-                            if cell.index != override_cell.index {
-                                guard = &cell.index;
-                            } else {
-                                delta_index = (delta_index + 1) % deltas.len();
-                            }
-                        }
-                        '#' => delta_index = (delta_index + 1) % deltas.len(),
-                        '^' => guard = &cell.index,
-                        _ => break,
-                    },
-                    None => break,
-                }
-
-                if visited.contains(&(guard.x, guard.y, delta_index)) {
-                    counter += 1;
-                    break;
-                }
-                visited.insert((guard.x, guard.y, delta_index));
-            }
-        }
-
-        counter.to_string()
+        exit_stage(&grid, None)
+            .unwrap()
+            .par_iter()
+            .map(|i| exit_stage(&grid, Some(*i)))
+            .filter(|o| o.is_none())
+            .count()
+            .to_string()
     }
 }
 

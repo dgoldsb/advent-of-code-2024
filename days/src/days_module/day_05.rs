@@ -1,5 +1,5 @@
 use crate::days_module::day::Day;
-use std::collections::{HashMap, HashSet};
+use std::collections::HashSet;
 
 pub struct Day05 {}
 
@@ -58,6 +58,7 @@ impl Day for Day05 {
     fn get_index(&self) -> u8 {
         5
     }
+
     fn part_a(&self, input: &String) -> String {
         let mut iterator = input.split("\n\n");
         let rules = parse_rules(iterator.next().unwrap());

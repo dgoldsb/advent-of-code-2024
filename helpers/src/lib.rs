@@ -130,6 +130,8 @@ pub async fn submit_answer(
 
     if response_text.contains("That's the right answer!") {
         println!("Answer submitted successfully!");
+        record.record_submission(day, level, answer);
+        record.save(cache_dir)?;
         Ok("Success!".to_string())
     } else if response_text.contains("Oh, hello! Funny seeing you here.") {
         // Treat this as an error and stop submitting further answers
