@@ -1,6 +1,5 @@
 use crate::days_module::day::Day;
 use helpers::ints_from_string;
-use std::path::Component::ParentDir;
 
 pub struct Day07 {}
 
@@ -15,6 +14,11 @@ fn find_combinations(
     numbers: &[isize],
     include_concatenate: bool,
 ) -> usize {
+    // Prune.
+    if memory > *target {
+        return 0;
+    }
+
     // Assume left-to-right evaluation.
     if numbers.len() == 0 {
         if *target == memory {
