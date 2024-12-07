@@ -1,3 +1,4 @@
+use std::path::Component::ParentDir;
 use crate::days_module::day::Day;
 use helpers::ints_from_string;
 
@@ -8,45 +9,55 @@ fn concat(a: isize, b: isize) -> isize {
     ab_str.parse::<isize>().unwrap()
 }
 
-fn find_combinations(
+fn can_be_made_true(
     target: &isize,
     memory: isize,
     numbers: &[isize],
     include_concatenate: bool,
-) -> usize {
+) -> bool {
     // Prune.
     if memory > *target {
-        return 0;
+        return false;
     }
 
     // Assume left-to-right evaluation.
     if numbers.len() == 0 {
         if *target == memory {
-            1
+            true
         } else {
-            0
+            false
         }
     } else {
-        let mut combinations = find_combinations(
-            target,
-            memory * numbers[0],
-            &numbers[1..],
-            include_concatenate,
-        ) + find_combinations(
-            target,
-            memory + numbers[0],
-            &numbers[1..],
-            include_concatenate,
-        );
         if include_concatenate {
-            combinations += find_combinations(
+            can_be_made_true(
+                target,
+                memory * numbers[0],
+                &numbers[1..],
+                include_concatenate,
+            ) || can_be_made_true(
+                target,
+                memory + numbers[0],
+                &numbers[1..],
+                include_concatenate,
+            ) || can_be_made_true(
                 target,
                 concat(memory, numbers[0]),
                 &numbers[1..],
                 include_concatenate,
-            );
+            )
+        } else {
+            can_be_made_true(
+                target,
+                memory * numbers[0],
+                &numbers[1..],
+                include_concatenate,
+            ) || can_be_made_true(
+                target,
+                memory + numbers[0],
+                &numbers[1..],
+                include_concatenate,
+            )
         }
-        combinations
     }
 }
 
@@ -63,10 +74,9 @@ impl Day for Day07 {
             .lines()
             .map(|l| {
                 let ints = ints_from_string(l.replace(": ", " ").trim());
-                let combinations = find_combinations(&ints[0], ints[1].clone(), &ints[2..], false);
-                match combinations {
-                    0 => 0,
-                    _ => ints[0],
+                match can_be_made_true(&ints[0], ints[1].clone(), &ints[2..], false) {
+                    false => 0,
+                    true => ints[0],
                 }
             })
             .sum::<isize>()
@@ -78,10 +88,9 @@ impl Day for Day07 {
             .lines()
             .map(|l| {
                 let ints = ints_from_string(l.replace(": ", " ").trim());
-                let combinations = find_combinations(&ints[0], ints[1].clone(), &ints[2..], true);
-                match combinations {
-                    0 => 0,
-                    _ => ints[0],
+                match can_be_made_true(&ints[0], ints[1].clone(), &ints[2..], true) {
+                    false => 0,
+                    true => ints[0],
                 }
             })
             .sum::<isize>()
