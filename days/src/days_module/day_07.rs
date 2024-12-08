@@ -1,6 +1,6 @@
-use std::path::Component::ParentDir;
 use crate::days_module::day::Day;
 use helpers::ints_from_string;
+use rayon::prelude::*;
 
 pub struct Day07 {}
 
@@ -85,7 +85,7 @@ impl Day for Day07 {
 
     fn part_b(&self, input: &String) -> String {
         input
-            .lines()
+            .par_lines()
             .map(|l| {
                 let ints = ints_from_string(l.replace(": ", " ").trim());
                 match can_be_made_true(&ints[0], ints[1].clone(), &ints[2..], true) {
