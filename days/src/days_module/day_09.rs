@@ -118,9 +118,36 @@ fn shuffle_memory(input: &mut Vec<MemoryBlock>) -> &Vec<MemoryBlock> {
             if start_value.content.is_some() {
                 start_index += 1;
                 continue;
-            } else if start_value.size >= end_value.size {
-                input[start_index].content = end_value.content.clone();
+            } else if start_value.size == end_value.size {
+                let end_value = end_value.content.clone().unwrap();
+                let new_block = MemoryBlock {
+                    size: end_value.size,
+                    content: Some(File {
+                        size: end_value.size,
+                        value: end_value.value,
+                    }),
+                };
+
+                input[start_index] = new_block;
                 input[end_index].content = None;
+                break;
+            } else if start_value.size > end_value.size {
+                let end_value = end_value.content.clone().unwrap();
+                let new_block = MemoryBlock {
+                    size: end_value.size,
+                    content: Some(File {
+                        size: end_value.size,
+                        value: end_value.value,
+                    }),
+                };
+                let remainder_block = MemoryBlock {
+                    size: start_value.size - end_value.size,
+                    content: None,
+                };
+
+                input[start_index] = new_block;
+                input.insert(start_index + 1, remainder_block);
+                input[end_index + 1].content = None;
                 break;
             } else {
                 start_index += 1;
@@ -156,12 +183,6 @@ impl Day for Day09 {
     fn part_b(&self, input: &String) -> String {
         let mut uncompressed = decompress_into_memory(input);
         let shuffled = shuffle_memory(&mut uncompressed);
-
-        let debug = shuffled
-            .iter()
-            .map(|m| m.expand())
-            .flatten()
-            .collect::<Vec<usize>>();
 
         shuffled
             .iter()
