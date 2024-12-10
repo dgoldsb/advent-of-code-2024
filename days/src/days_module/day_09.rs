@@ -183,7 +183,6 @@ impl Day for Day09 {
     fn part_b(&self, input: &String) -> String {
         let mut uncompressed = decompress_into_memory(input);
         let shuffled = shuffle_memory(&mut uncompressed);
-
         shuffled
             .iter()
             .map(|m| m.expand())

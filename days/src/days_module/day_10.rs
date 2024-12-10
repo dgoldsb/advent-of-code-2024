@@ -1,3 +1,7 @@
+use std::str::FromStr;
+use helpers::grid::cell::Cell;
+use helpers::grid::grid::Grid;
+use helpers::grid::grid_index::GridIndex;
 use crate::days_module::day::Day;
 
 pub struct Day10 {}
@@ -8,10 +12,34 @@ impl Day for Day10 {
     }
 
     fn get_index(&self) -> u8 {
-        1
+        10
     }
     fn part_a(&self, input: &String) -> String {
-        "".to_string()
+        let grid = Grid::from_str(input).unwrap();
+        let mut stack = grid.iter().filter(|c| c.value == '0').map(|c| c.index.clone()).collect::<Vec<GridIndex>>();
+        let mut count = 0;
+
+        while !stack.is_empty() {
+            let index = stack.pop().unwrap();
+            for neighbour in index.neumann_neighborhood() {
+                let neighbour_cell_option = grid.get_cell(&neighbour);
+
+                if neighbour_cell_option.is_none() {
+                    continue;
+                }
+
+                if grid.get_cell(&index).unwrap().value.to_digit(10).unwrap() + 1 == neighbour_cell_option.unwrap().value.to_digit(10).unwrap() {
+                    stack.push(neighbour);
+                }
+
+                if grid.get_cell(&index).unwrap().value == '9' {
+                    count += 1;
+                }
+            }
+        }
+
+
+        count.to_string()
     }
 
     fn part_b(&self, input: &String) -> String {
