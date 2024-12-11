@@ -12,7 +12,7 @@ fn solve(blinks: usize, stone: usize, memory: &mut HashMap<(usize, usize), usize
         return memory.get(&(stone, blinks)).unwrap().clone();
     }
 
-    let mut result: usize;
+    let result: usize;
     let stone_string = stone.to_string();
 
     if stone == 0 {
