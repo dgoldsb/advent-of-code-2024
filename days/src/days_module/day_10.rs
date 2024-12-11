@@ -1,5 +1,4 @@
 use crate::days_module::day::Day;
-use helpers::grid::cell::Cell;
 use helpers::grid::grid::Grid;
 use helpers::grid::grid_index::GridIndex;
 use std::collections::HashSet;
