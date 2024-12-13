@@ -27,8 +27,8 @@ fn find_minimum(
     ])
     .unwrap();
 
-    if (result[0].round() - result[0]).abs() > 0.000001
-        || (result[1].round() - result[1]).abs() > 0.000001
+    if (result[0].round() - result[0]).abs() > 0.0001
+        || (result[1].round() - result[1]).abs() > 0.0001
     {
         return 0;
     }
@@ -60,12 +60,24 @@ impl Day for Day13 {
     }
 
     fn part_b(&self, input: &String) -> String {
-        "".to_string()
+        let mut numbers = find_numbers(input);
+        numbers.reverse();
+        let mut result = 0;
+        while !numbers.is_empty() {
+            let a_delta = (numbers.pop().unwrap(), numbers.pop().unwrap());
+            let b_delta = (numbers.pop().unwrap(), numbers.pop().unwrap());
+            let target = (
+                numbers.pop().unwrap() + 10000000000000,
+                numbers.pop().unwrap() + 10000000000000,
+            );
+            result += find_minimum(&a_delta, &b_delta, &target);
+        }
+
+        result.to_string()
     }
 }
 
 #[cfg(test)]
-
 mod tests {
 
     use super::*;
