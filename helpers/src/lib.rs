@@ -231,3 +231,50 @@ pub fn lcm(numbers: &Vec<u128>) -> u128 {
 pub fn manhattan_distance(start: &(usize, usize), end: &(usize, usize)) -> usize {
     (max(start.0, end.0) - min(start.0, end.0)) + (max(start.1, end.1) - min(start.1, end.1))
 }
+
+pub fn gauss_jordan(mut matrix: Vec<Vec<f64>>) -> Option<Vec<f64>> {
+    let rows = matrix.len();
+    let cols = matrix[0].len();
+
+    if cols != rows + 1 {
+        return None; // Invalid matrix dimensions
+    }
+
+    for i in 0..rows {
+        let mut max_row = i;
+        for k in i + 1..rows {
+            if matrix[k][i].abs() > matrix[max_row][i].abs() {
+                max_row = k;
+            }
+        }
+
+        if i != max_row {
+            matrix.swap(i, max_row);
+        }
+
+        if matrix[i][i].abs() < 1e-10 {
+            return None; // No unique solution
+        }
+
+        let pivot = matrix[i][i];
+        for j in 0..cols {
+            matrix[i][j] /= pivot;
+        }
+
+        for k in 0..rows {
+            if k != i {
+                let factor = matrix[k][i];
+                for j in 0..cols {
+                    matrix[k][j] -= factor * matrix[i][j];
+                }
+            }
+        }
+    }
+
+    let mut solution = vec![0.0; rows];
+    for i in 0..rows {
+        solution[i] = matrix[i][cols - 1];
+    }
+
+    Some(solution)
+}
