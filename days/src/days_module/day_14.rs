@@ -58,7 +58,7 @@ impl Day for Day14 {
             print_sparse_grid(&position_set, (grid_size.0 as usize, grid_size.1 as usize));
         }
 
-        let middle = (grid_size.1 / 2, grid_size.0 / 2);
+        let middle = (grid_size.0 / 2, grid_size.1 / 2);
         let mut buckets = vec![0, 0, 0, 0];
         for robot in &robots {
             if robot.position.0 < middle.0 && robot.position.1 < middle.1 {
