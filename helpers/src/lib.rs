@@ -291,16 +291,17 @@ pub fn find_numbers(s: &str) -> Vec<isize> {
         .collect()
 }
 
-pub fn print_sparse_grid(s: &HashSet<(usize, usize)>, grid_size: (usize, usize)) {
+pub fn print_sparse_grid(s: &HashSet<(usize, usize)>, grid_size: (usize, usize)) -> String {
+    let mut output = String::new();
     for x in 0..grid_size.0 {
         for y in 0..grid_size.1 {
             if s.contains(&(x, y)) {
-                print!("X");
+                output.push('#');
             } else {
-                print!(".");
+                output.push('.');
             }
         }
-        println!();
+        output.push('\n');
     }
-    println!();
+    output
 }
