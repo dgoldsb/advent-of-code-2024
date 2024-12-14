@@ -1,6 +1,13 @@
 use crate::days_module::day::Day;
+use helpers::{find_numbers, print_sparse_grid};
+use std::collections::HashSet;
 
 pub struct Day14 {}
+
+struct Robot {
+    position: (isize, isize),
+    velocity: (isize, isize),
+}
 
 impl Day for Day14 {
     fn get_id(&self) -> String {
@@ -8,10 +15,64 @@ impl Day for Day14 {
     }
 
     fn get_index(&self) -> u8 {
-        1
+        14
     }
     fn part_a(&self, input: &String) -> String {
-        "".to_string()
+        let grid_size = (103, 101);
+        let seconds_to_wait = 100;
+
+        let mut numbers = find_numbers(input);
+        numbers.reverse();
+        let mut robots = Vec::new();
+
+        while !numbers.is_empty() {
+            let y = numbers.pop().unwrap();
+            let x = numbers.pop().unwrap();
+            let vy = numbers.pop().unwrap();
+            let vx = numbers.pop().unwrap();
+            let robot = Robot {
+                position: (x, y),
+                velocity: (vx, vy),
+            };
+            robots.push(robot);
+        }
+
+        let position_set = robots
+            .iter()
+            .map(|r| (r.position.0 as usize, r.position.1 as usize))
+            .collect::<HashSet<_>>();
+        print_sparse_grid(&position_set, (grid_size.0 as usize, grid_size.1 as usize));
+
+        for _ in 0..seconds_to_wait {
+            for robot in robots.iter_mut() {
+                robot.position = (
+                    (robot.position.0 + robot.velocity.0 + grid_size.0) % grid_size.0,
+                    (robot.position.1 + robot.velocity.1 + grid_size.1) % grid_size.1,
+                );
+            }
+
+            let position_set = robots
+                .iter()
+                .map(|r| (r.position.0 as usize, r.position.1 as usize))
+                .collect::<HashSet<_>>();
+            print_sparse_grid(&position_set, (grid_size.0 as usize, grid_size.1 as usize));
+        }
+
+        let middle = (grid_size.1 / 2, grid_size.0 / 2);
+        let mut buckets = vec![0, 0, 0, 0];
+        for robot in &robots {
+            if robot.position.0 < middle.0 && robot.position.1 < middle.1 {
+                buckets[0] += 1;
+            } else if robot.position.0 > middle.0 && robot.position.1 < middle.1 {
+                buckets[1] += 1;
+            } else if robot.position.0 < middle.0 && robot.position.1 > middle.1 {
+                buckets[2] += 1;
+            } else if robot.position.0 > middle.0 && robot.position.1 > middle.1 {
+                buckets[3] += 1;
+            }
+        }
+
+        (buckets[0] * buckets[1] * buckets[2] * buckets[3]).to_string()
     }
 
     fn part_b(&self, input: &String) -> String {

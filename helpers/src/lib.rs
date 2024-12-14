@@ -1,10 +1,12 @@
 pub mod cube;
 pub mod cycle;
 pub mod grid;
+use lazy_static::lazy_static;
+use regex::Regex;
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
 use std::cmp::{max, min};
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::env;
 use std::fs;
 use std::io::Write;
@@ -277,4 +279,28 @@ pub fn gauss_jordan(mut matrix: Vec<Vec<f64>>) -> Option<Vec<f64>> {
     }
 
     Some(solution)
+}
+
+pub fn find_numbers(s: &str) -> Vec<isize> {
+    lazy_static! {
+        static ref RE: Regex = Regex::new(r"-?\d+").unwrap();
+    }
+
+    RE.find_iter(s)
+        .filter_map(|digits| digits.as_str().parse().ok())
+        .collect()
+}
+
+pub fn print_sparse_grid(s: &HashSet<(usize, usize)>, grid_size: (usize, usize)) {
+    for x in 0..grid_size.0 {
+        for y in 0..grid_size.1 {
+            if s.contains(&(x, y)) {
+                print!("X");
+            } else {
+                print!(".");
+            }
+        }
+        println!();
+    }
+    println!();
 }

@@ -1,25 +1,10 @@
 use crate::days_module::day::Day;
-use helpers::gauss_jordan;
-
-use lazy_static::lazy_static;
-use regex::Regex;
-
-fn find_numbers(s: &str) -> Vec<usize> {
-    lazy_static! {
-        static ref RE: Regex = Regex::new(r"\d+").unwrap();
-    }
-
-    RE.find_iter(s)
-        .filter_map(|digits| digits.as_str().parse().ok())
-        .collect()
-}
-
-pub struct Day13 {}
+use helpers::{find_numbers, gauss_jordan};
 
 fn find_minimum(
-    a_delta: &(usize, usize),
-    b_delta: &(usize, usize),
-    target: &(usize, usize),
+    a_delta: &(isize, isize),
+    b_delta: &(isize, isize),
+    target: &(isize, isize),
 ) -> usize {
     let result = gauss_jordan(vec![
         vec![a_delta.0 as f64, b_delta.0 as f64, target.0 as f64],
@@ -35,6 +20,8 @@ fn find_minimum(
 
     result[0].round() as usize * 3 + result[1].round() as usize
 }
+
+pub struct Day13 {}
 
 impl Day for Day13 {
     fn get_id(&self) -> String {
