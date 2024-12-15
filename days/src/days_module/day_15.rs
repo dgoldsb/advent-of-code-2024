@@ -176,7 +176,7 @@ fn execute_push_cell(
             target_cell_mut.value = grid.get_cell(index).unwrap().borrow().value;
         }
         '[' => {
-            target_cell_mut.value = '.';
+            target_cell_mut.value = grid.get_cell(index).unwrap().borrow().value;
             if *direction == Direction::DOWN || *direction == Direction::UP {
                 let binding = grid
                     .move_from_cell(&target_cell_mut.index, &Direction::RIGHT)
@@ -185,7 +185,7 @@ fn execute_push_cell(
             }
         }
         ']' => {
-            target_cell_mut.value = '.';
+            target_cell_mut.value = grid.get_cell(index).unwrap().borrow().value;
             if *direction == Direction::DOWN || *direction == Direction::UP {
                 let binding = grid
                     .move_from_cell(&target_cell_mut.index, &Direction::LEFT)
@@ -236,7 +236,6 @@ impl Day for Day15 {
 
         let mut robot_index = grid.find_index(&'@').unwrap().clone();
         for direction in directions {
-            grid.print();
             if check_can_push_cell(&grid, &direction, &robot_index) {
                 let new_robot_index = execute_push_cell(&mut grid, &direction, &robot_index);
                 let binding = grid.get_cell(&robot_index).unwrap();
