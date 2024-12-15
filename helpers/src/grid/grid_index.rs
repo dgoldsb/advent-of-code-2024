@@ -46,3 +46,10 @@ impl GridIndex {
         result
     }
 }
+
+pub enum Direction {
+    UP,
+    DOWN,
+    RIGHT,
+    LEFT,
+}
