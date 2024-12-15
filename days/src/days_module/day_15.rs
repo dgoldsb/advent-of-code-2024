@@ -1,13 +1,13 @@
 use crate::days_module::day::Day;
-use helpers::grid::mutable_grid::{Direction, Grid};
+use helpers::grid::grid_index::{Direction, GridIndex};
+use helpers::grid::mutable_grid::MutableGrid;
 use std::str::FromStr;
-use helpers::grid::grid_index::GridIndex;
 
 pub struct Day15 {}
 
-fn parse_input(input: &str) -> (Grid, Vec<Direction>) {
+fn parse_input(input: &str) -> (MutableGrid, Vec<Direction>) {
     let mut iterator = input.split("\n\n");
-    let grid = Grid::from_str(iterator.next().unwrap()).unwrap();
+    let grid = MutableGrid::from_str(iterator.next().unwrap()).unwrap();
     let directions = iterator
         .next()
         .unwrap()
@@ -26,37 +26,35 @@ fn parse_input(input: &str) -> (Grid, Vec<Direction>) {
     (grid, directions)
 }
 
-fn push_cell(grid: &mut Grid, direction: &Direction, index: &GridIndex) -> Result<GridIndex, ()> {
+fn push_cell(
+    grid: &mut MutableGrid,
+    direction: &Direction,
+    index: &GridIndex,
+) -> Result<GridIndex, ()> {
     let target = grid.move_from_cell(index, direction);
 
     if target.is_none() {
         return Err(());
     }
 
-    let current_cell_rc = grid.get_cell(index).unwrap();
-    let current_cell_value = current_cell_rc.borrow().value;
-    let target_cell_rc = target.unwrap();
-    let target_cell = target_cell_rc.borrow();
-    match target_cell.value {
-        '.' => {
-            current_cell_rc.borrow_mut().value = '.';
-            target_cell_rc.borrow_mut().value = current_cell_value;
-            Ok(target_cell.index)
-        },
+    let target_rc = target.unwrap();
+    match target_rc.borrow().value {
+        '.' => {}
         'O' => {
-            let result = push_cell(grid, direction, &target_cell.index);
+            let result = push_cell(grid, direction, &target_rc.borrow().index);
             if result.is_err() {
-                Err(())
-            } else {
-                current_cell_rc.borrow_mut().value = '.';
-                target_cell_rc.borrow_mut().value = current_cell_value;
-                Ok(target_cell.index)
+                return Err(());
             }
         }
-        '#' => { Err(()) },
+        '#' => {
+            return Err(());
+        }
         c => panic!("Unexpected character `{}`", c),
     }
 
+    let mut target_cell_mut = target_rc.borrow_mut();
+    target_cell_mut.value = grid.get_cell(index).unwrap().borrow().value;
+    Ok(target_cell_mut.index)
 }
 
 impl Day for Day15 {
@@ -75,10 +73,19 @@ impl Day for Day15 {
             let result = push_cell(&mut grid, &direction, &robot_index);
 
             if result.is_ok() {
+                let binding = grid.get_cell(&robot_index).unwrap();
+                let mut current_cell_mut = binding.borrow_mut();
+                current_cell_mut.value = '.';
                 robot_index = result.unwrap();
             }
         }
-        "".to_string()
+
+        grid.iter()
+            .map(|cell| cell.borrow().clone())
+            .filter(|cell| cell.value == 'O')
+            .map(|cell| cell.index.y + cell.index.x * 100)
+            .sum::<isize>()
+            .to_string()
     }
 
     fn part_b(&self, input: &String) -> String {

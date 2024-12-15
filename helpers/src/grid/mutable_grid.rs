@@ -1,5 +1,5 @@
 use crate::grid::cell::Cell;
-use crate::grid::grid_index::GridIndex;
+use crate::grid::grid_index::{Direction, GridIndex};
 use std::cell::RefCell;
 use std::rc::Rc;
 use std::str::FromStr;
@@ -41,7 +41,11 @@ impl MutableGrid {
         Some(Rc::clone(&self.cells[vec_index]))
     }
 
-    pub fn move_from_cell(&self, index: &GridIndex, direction: &Direction) -> Option<Rc<RefCell<Cell>>> {
+    pub fn move_from_cell(
+        &self,
+        index: &GridIndex,
+        direction: &Direction,
+    ) -> Option<Rc<RefCell<Cell>>> {
         match direction {
             Direction::UP => self.get_cell_by_index(&(index.x - 1, index.y)),
             Direction::DOWN => self.get_cell_by_index(&(index.x + 1, index.y)),
