@@ -41,6 +41,19 @@ impl MutableGrid {
         Some(Rc::clone(&self.cells[vec_index]))
     }
 
+    pub fn print(&self) {
+        let mut last_y = 0;
+        for cell in &self.cells {
+            let new_y = cell.borrow().index.y;
+            if new_y < last_y {
+                print!("\n");
+            }
+            last_y = new_y;
+            print!("{}", cell.borrow().value.to_string());
+        }
+        print!("\n");
+    }
+
     pub fn move_from_cell(
         &self,
         index: &GridIndex,

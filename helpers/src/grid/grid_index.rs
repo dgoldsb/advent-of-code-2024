@@ -47,6 +47,7 @@ impl GridIndex {
     }
 }
 
+#[derive(Copy, Clone, Debug, Eq, Hash, PartialEq, Ord, PartialOrd)]
 pub enum Direction {
     UP,
     DOWN,
