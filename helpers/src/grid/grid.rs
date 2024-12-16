@@ -1,5 +1,5 @@
 use crate::grid::cell::Cell;
-use crate::grid::grid_index::GridIndex;
+use crate::grid::grid_index::{Direction, GridIndex};
 use core::slice::Iter;
 use std::str::FromStr;
 
@@ -38,6 +38,40 @@ impl Grid {
 
         let vec_index: usize = (index.0 * self.dimensions.1 + index.1).try_into().unwrap();
         return Some(&self.cells[vec_index]);
+    }
+
+    pub fn print(&self) {
+        let mut last_y = 0;
+        for cell in &self.cells {
+            let new_y = cell.index.y;
+            if new_y < last_y {
+                print!("\n");
+            }
+            last_y = new_y;
+            print!("{}", cell.value.to_string());
+        }
+        print!("\n");
+    }
+
+    pub fn move_from_cell(&self, index: &GridIndex, direction: &Direction) -> Option<&Cell> {
+        match direction {
+            Direction::UP => self.get_cell(&GridIndex {
+                x: index.x - 1,
+                y: index.y,
+            }),
+            Direction::DOWN => self.get_cell(&GridIndex {
+                x: index.x + 1,
+                y: index.y,
+            }),
+            Direction::RIGHT => self.get_cell(&GridIndex {
+                x: index.x,
+                y: index.y + 1,
+            }),
+            Direction::LEFT => self.get_cell(&GridIndex {
+                x: index.x,
+                y: index.y - 1,
+            }),
+        }
     }
 }
 
