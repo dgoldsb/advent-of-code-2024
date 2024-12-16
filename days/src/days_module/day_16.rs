@@ -1,8 +1,18 @@
 use crate::days_module::day::Day;
 use helpers::grid::grid::Grid;
 use helpers::grid::grid_index::{Direction, GridIndex};
+use lazy_static::lazy_static;
 use std::collections::{BinaryHeap, HashMap, HashSet};
 use std::str::FromStr;
+
+lazy_static! {
+    static ref DIRECTIONS: Vec<Direction> = vec![
+        Direction::DOWN,
+        Direction::UP,
+        Direction::LEFT,
+        Direction::RIGHT,
+    ];
+}
 
 #[derive(Clone, Copy, Eq, Ord, PartialEq, PartialOrd, Hash)]
 struct State<'a> {
@@ -12,13 +22,6 @@ struct State<'a> {
 
 // State is location + direction, extra cost of 1000 for direction change.
 fn dijkstra(grid: &Grid, start_index: &GridIndex, end_index: &GridIndex) -> usize {
-    let directions = vec![
-        Direction::DOWN,
-        Direction::UP,
-        Direction::LEFT,
-        Direction::RIGHT,
-    ];
-
     let mut g_score: HashMap<State, usize> = HashMap::new();
     let mut came_from: HashMap<State, State> = HashMap::new();
     let mut open_set: HashSet<State> = HashSet::new();
@@ -40,7 +43,7 @@ fn dijkstra(grid: &Grid, start_index: &GridIndex, end_index: &GridIndex) -> usiz
             continue;
         }
 
-        for direction in &directions {
+        for direction in DIRECTIONS.iter() {
             let neighbor_cell = grid
                 .move_from_cell(current_state.index, &direction)
                 .unwrap();
@@ -89,6 +92,55 @@ fn dijkstra(grid: &Grid, start_index: &GridIndex, end_index: &GridIndex) -> usiz
         .clone()
 }
 
+fn pruned_dfs<'a>(
+    grid: &'a Grid,
+    current: &'a GridIndex,
+    current_direction: &'a Direction,
+    score: usize,
+    max_score: &'a usize,
+    visited: &'a mut HashSet<&'a GridIndex>,
+) -> bool {
+    if score > *max_score {
+        return false;
+    }
+
+    if grid.get_cell(&current).unwrap().value == 'E' {
+        visited.insert(current);
+        return true;
+    }
+
+    let mut any_found = false;
+    for direction in DIRECTIONS.iter() {
+        let neighbor_cell = grid.move_from_cell(current, &direction).unwrap();
+
+        if neighbor_cell.value == '#' {
+            continue;
+        }
+
+        let mut enter_cost = 1;
+        if direction != current_direction {
+            enter_cost += 1000;
+        }
+
+        any_found = any_found
+            || pruned_dfs(
+                grid,
+                &neighbor_cell.index,
+                direction,
+                score + enter_cost,
+                max_score,
+                visited,
+            );
+    }
+
+    if any_found {
+        visited.insert(current);
+        true
+    } else {
+        false
+    }
+}
+
 pub struct Day16 {}
 
 impl Day for Day16 {
@@ -107,6 +159,8 @@ impl Day for Day16 {
     }
 
     fn part_b(&self, input: &String) -> String {
+        let shortest_path = self.part_a(&input).parse::<usize>().unwrap();
+
         "".to_string()
     }
 }
