@@ -139,7 +139,9 @@ pub async fn submit_answer(
         // Treat this as an error and stop submitting further answers
         return Err("You must complete the previous levels first".into());
     } else if response_text.contains("You don't seem to be solving the right level.") {
-        return Err("You don't seem to be solving the right level".into());
+        record.record_submission(day, level, answer);
+        record.save(cache_dir)?;
+        Ok("Are you rerunning the level after submitting?".to_string())
     } else if response_text.contains("That's not the right answer.") {
         println!("Incorrect answer.");
         return Err("Incorrect answer".into());
@@ -284,6 +286,16 @@ pub fn gauss_jordan(mut matrix: Vec<Vec<f64>>) -> Option<Vec<f64>> {
 pub fn find_numbers(s: &str) -> Vec<isize> {
     lazy_static! {
         static ref RE: Regex = Regex::new(r"-?\d+").unwrap();
+    }
+
+    RE.find_iter(s)
+        .filter_map(|digits| digits.as_str().parse().ok())
+        .collect()
+}
+
+pub fn find_usize(s: &str) -> Vec<usize> {
+    lazy_static! {
+        static ref RE: Regex = Regex::new(r"\d+").unwrap();
     }
 
     RE.find_iter(s)
