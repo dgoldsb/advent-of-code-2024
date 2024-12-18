@@ -4,7 +4,6 @@ use helpers::grid::grid_index::{Direction, GridIndex};
 use lazy_static::lazy_static;
 use std::collections::{BinaryHeap, HashMap, HashSet};
 
-
 lazy_static! {
     static ref DIRECTIONS: Vec<Direction> = vec![
         Direction::DOWN,
@@ -24,11 +23,14 @@ struct State {
 fn dijkstra(
     start_index: &GridIndex,
     corruptions: &HashMap<isize, HashSet<GridIndex>>,
-) -> usize {
+    pre_fallen: isize,
+) -> Option<usize> {
     let grid_max = 70;
-    let pre_fallen = 1024;
 
-    let end_index = GridIndex { x: grid_max, y: grid_max };
+    let end_index = GridIndex {
+        x: grid_max,
+        y: grid_max,
+    };
 
     let mut g_score: HashMap<State, usize> = HashMap::new();
     let mut came_from: HashMap<State, State> = HashMap::new();
@@ -49,7 +51,7 @@ fn dijkstra(
         open_set.remove(&current_state);
 
         if current_state.index == end_index {
-            return usize::MAX - current;
+            return Some(usize::MAX - current);
         }
 
         for direction in DIRECTIONS.iter() {
@@ -76,7 +78,11 @@ fn dijkstra(
                 continue;
             }
 
-            if corruptions.get(&current_state.time_spent).unwrap_or(&HashSet::new()).contains(&neighbor) {
+            if corruptions
+                .get(&current_state.time_spent)
+                .unwrap_or(&HashSet::new())
+                .contains(&neighbor)
+            {
                 continue;
             }
 
@@ -104,7 +110,25 @@ fn dijkstra(
             }
         }
     }
-    panic!("No path found!");
+    None
+}
+
+fn get_corruptions(input: &Vec<isize>) -> HashMap<isize, HashSet<GridIndex>> {
+    let mut number_iterator = input.iter();
+    let mut corruptions: HashMap<isize, HashSet<GridIndex>> = HashMap::new();
+    let mut index = 1;
+    corruptions.insert(0, HashSet::new());
+    while let Some(x) = number_iterator.next() {
+        let y = number_iterator.next().unwrap();
+        let corruption: GridIndex = GridIndex { x: *x, y: *y };
+        let mut new_set = HashSet::new();
+        new_set.insert(corruption);
+        new_set.extend(corruptions.get(&(index - 1)).unwrap());
+        corruptions.insert(index, new_set);
+        index += 1;
+    }
+
+    corruptions
 }
 
 pub struct Day18 {}
@@ -119,30 +143,27 @@ impl Day for Day18 {
     }
     fn part_a(&self, input: &String) -> String {
         let binding = find_numbers(&input);
-        let mut number_iterator = binding.iter();
-        let mut corruptions: HashMap<isize, HashSet<GridIndex>> = HashMap::new();
-        let mut index = 1;  // TODO off by one?
-
-        corruptions.insert(0, HashSet::new());
-
-        while let Some(x) = number_iterator.next() {
-            let y = number_iterator.next().unwrap();
-            let corruption: GridIndex = GridIndex { x: *x, y: *y };
-            
-            let mut new_set = HashSet::new();
-            new_set.insert(corruption);
-            new_set.extend(corruptions.get(&(index - 1)).unwrap());
-            corruptions.insert(index, new_set);
-
-
-            index += 1;
-        }
-
-        dijkstra(&GridIndex { x: 0, y: 0 }, &corruptions).to_string()
+        dijkstra(&GridIndex { x: 0, y: 0 }, &get_corruptions(&binding), 1024)
+            .unwrap()
+            .to_string()
     }
 
     fn part_b(&self, input: &String) -> String {
-        "".to_string()
+        let binding = find_numbers(&input);
+        let corruptions = get_corruptions(&binding);
+        let mut start = 1024;
+        loop {
+            let result = dijkstra(&GridIndex { x: 0, y: 0 }, &corruptions, start);
+            if result.is_none() {
+                break;
+            }
+            start += 1;
+        }
+        format!(
+            "{},{}",
+            binding[(start * 2 - 2) as usize],
+            binding[(start * 2 - 1) as usize]
+        )
     }
 }
 
