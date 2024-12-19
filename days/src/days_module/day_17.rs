@@ -12,27 +12,13 @@ struct Computer {
 impl Computer {
     fn find_combo(&self, operant: &usize) -> usize {
         match operant % 8 {
-            0 => {
-                0
-            }
-            1 => {
-                1
-            }
-            2 => {
-                2
-            }
-            3 => {
-                3
-            }
-            4 => {
-                self.a
-            }
-            5 => {
-                self.b
-            }
-            6 => {
-                self.c
-            }
+            0 => 0,
+            1 => 1,
+            2 => 2,
+            3 => 3,
+            4 => self.a,
+            5 => self.b,
+            6 => self.c,
             i => {
                 panic!("Received invalid Opcode {}", i);
             }
@@ -40,10 +26,12 @@ impl Computer {
     }
 
     fn apply_opcode(&mut self, opcode: &usize, operant: &usize) -> Option<usize> {
-        println!("({} {} {}) {} {}", self.a, self.b, self.c, opcode, operant);
         match opcode {
             0 => {
-                self.a = self.a / 2_usize.checked_pow(self.find_combo(operant) as u32).unwrap();
+                self.a = self.a
+                    / 2_usize
+                        .checked_pow(self.find_combo(operant) as u32)
+                        .unwrap();
                 self.instruction_pointer += 2;
             }
             1 => {
@@ -70,11 +58,17 @@ impl Computer {
                 return Some(self.find_combo(operant) % 8);
             }
             6 => {
-                self.b = self.a / 2_usize.checked_pow(self.find_combo(operant) as u32).unwrap();
+                self.b = self.a
+                    / 2_usize
+                        .checked_pow(self.find_combo(operant) as u32)
+                        .unwrap();
                 self.instruction_pointer += 2;
             }
             7 => {
-                self.c = self.a / 2_usize.checked_pow(self.find_combo(operant) as u32).unwrap();
+                self.c = self.a
+                    / 2_usize
+                        .checked_pow(self.find_combo(operant) as u32)
+                        .unwrap();
                 self.instruction_pointer += 2;
             }
             i => {
@@ -95,7 +89,7 @@ impl Computer {
             let opcode = program[self.instruction_pointer];
             let operant = program[self.instruction_pointer + 1];
             let result = self.apply_opcode(&opcode, &operant);
-            
+
             if result.is_some() {
                 if output.len() > 0 {
                     output.push(',');

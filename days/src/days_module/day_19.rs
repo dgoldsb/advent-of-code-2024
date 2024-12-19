@@ -8,17 +8,15 @@ fn count_possible(patterns: &Vec<String>, designs: &Vec<String>) -> usize {
     let mut stack = patterns.clone();
 
     while let Some(tail) = stack.pop() {
-        let found = designs
-            .iter()
-            .any(|p| p == &tail);
+        let found = designs.iter().any(|p| p == &tail);
 
         if found {
             seen.insert(tail.clone());
         }
 
-        let valid_tail = designs
-            .iter()
-            .any(|p| p.len() >= tail.len() && p[(p.len() - tail.len())..p.len()] == tail[0..tail.len()]);
+        let valid_tail = designs.iter().any(|p| {
+            p.len() >= tail.len() && p[(p.len() - tail.len())..p.len()] == tail[0..tail.len()]
+        });
 
         if valid_tail {
             for pattern in patterns {
@@ -31,10 +29,7 @@ fn count_possible(patterns: &Vec<String>, designs: &Vec<String>) -> usize {
         }
     }
 
-    designs
-        .iter()
-        .filter(|&s| seen.contains(s))
-        .count()
+    designs.iter().filter(|&s| seen.contains(s)).count()
 }
 
 fn parse(input: &str) -> (Vec<String>, Vec<String>) {
@@ -54,7 +49,7 @@ fn parse(input: &str) -> (Vec<String>, Vec<String>) {
         .map(|s| s.to_string())
         .collect::<Vec<String>>();
 
-    return (patterns, designs)
+    return (patterns, designs);
 }
 
 impl Day for Day19 {
