@@ -30,18 +30,18 @@ fn dijkstra<'a>(
     let mut g_score: HashMap<State, usize> = HashMap::new();
     let mut came_from: HashMap<State, State> = HashMap::new();
     let mut open_set: HashSet<State> = HashSet::new();
-    let mut min_heap: BinaryHeap<(usize, State)> = BinaryHeap::new();
+    let mut max_heap: BinaryHeap<(usize, State)> = BinaryHeap::new();
 
     let state = State {
         index: start_index,
         direction: Direction::RIGHT,
     };
-    min_heap.push((usize::MAX, state));
+    max_heap.push((usize::MAX, state));
     g_score.insert(state, 0);
     open_set.insert(state);
 
-    while !min_heap.is_empty() {
-        let (current, current_state) = min_heap.pop().unwrap();
+    while !max_heap.is_empty() {
+        let (current, current_state) = max_heap.pop().unwrap();
         open_set.remove(&current_state);
 
         if current_state.index == end_index {
@@ -83,7 +83,7 @@ fn dijkstra<'a>(
 
             if !open_set.contains(&neighbor) {
                 open_set.insert(neighbor);
-                min_heap.push((usize::MAX - tentative_g_score, neighbor));
+                max_heap.push((usize::MAX - tentative_g_score, neighbor));
             }
         }
     }

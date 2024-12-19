@@ -1,35 +1,48 @@
 use crate::days_module::day::Day;
-use std::collections::HashSet;
+use std::collections::{BinaryHeap, HashMap, HashSet};
 
 pub struct Day19 {}
 
-fn count_possible(patterns: &Vec<String>, designs: &Vec<String>) -> usize {
-    let mut seen = HashSet::new();
-    let mut stack = patterns.clone();
+fn dijkstra(patterns: &Vec<String>, designs: &Vec<String>) -> HashMap<String, usize> {
+    let max_length = designs.iter().map(|d| d.len()).max().unwrap();
 
-    while let Some(tail) = stack.pop() {
-        let found = designs.iter().any(|p| p == &tail);
+    let mut visited_count: HashMap<String, usize> = HashMap::new();
+    let mut open_set: HashSet<String> = HashSet::new();
+    let mut max_heap: BinaryHeap<(usize, String)> = BinaryHeap::new();
 
-        if found {
-            seen.insert(tail.clone());
-        }
+    for pattern in patterns {
+        max_heap.push((usize::MAX - pattern.len(), String::from(pattern)));
+        open_set.insert(String::from(pattern));
+        visited_count.insert(String::from(pattern), 1);
+    }
 
-        let valid_tail = designs.iter().any(|p| {
-            p.len() >= tail.len() && p[(p.len() - tail.len())..p.len()] == tail[0..tail.len()]
-        });
+    while !max_heap.is_empty() {
+        let (_, head) = max_heap.pop().unwrap();
+        let head_count = visited_count.get(&head).unwrap().clone();
+        open_set.remove(&head);
 
-        if valid_tail {
-            for pattern in patterns {
-                let extended_tail = pattern.to_owned() + &tail;
-                if !seen.contains(&extended_tail) {
-                    seen.insert(extended_tail.clone());
-                    stack.push(extended_tail);
-                }
+        for pattern in patterns {
+            let neighbor = head.to_owned() + &pattern;
+            let new_key = !visited_count.contains_key(&neighbor);
+
+            let can_match = designs
+                .iter()
+                .any(|design| design.starts_with(neighbor.as_str()));
+
+            // TODO exit early
+            if !can_match || neighbor.len() > max_length {
+                continue;
             }
+
+            if new_key && !open_set.contains(&neighbor) {
+                max_heap.push((usize::MAX - neighbor.len(), neighbor.clone()));
+                open_set.insert(neighbor.clone());
+            }
+            *visited_count.entry(neighbor).or_insert(0) += head_count;
         }
     }
 
-    designs.iter().filter(|&s| seen.contains(s)).count()
+    visited_count
 }
 
 fn parse(input: &str) -> (Vec<String>, Vec<String>) {
@@ -49,7 +62,7 @@ fn parse(input: &str) -> (Vec<String>, Vec<String>) {
         .map(|s| s.to_string())
         .collect::<Vec<String>>();
 
-    return (patterns, designs);
+    (patterns, designs)
 }
 
 impl Day for Day19 {
@@ -63,11 +76,23 @@ impl Day for Day19 {
 
     fn part_a(&self, input: &String) -> String {
         let (patterns, designs) = parse(input);
-        count_possible(&patterns, &designs).to_string()
+        let map = dijkstra(&patterns, &designs);
+        designs
+            .iter()
+            .filter(|d| map.contains_key(*d))
+            .count()
+            .to_string()
     }
 
     fn part_b(&self, input: &String) -> String {
-        "".to_string()
+        let (patterns, designs) = parse(input);
+        let map = dijkstra(&patterns, &designs);
+        designs
+            .iter()
+            .filter(|d| map.contains_key(*d))
+            .map(|d| map.get(d).unwrap())
+            .sum::<usize>()
+            .to_string()
     }
 }
 
