@@ -29,7 +29,6 @@ fn dijkstra(patterns: &Vec<String>, designs: &Vec<String>) -> HashMap<String, us
                 .iter()
                 .any(|design| design.starts_with(neighbor.as_str()));
 
-            // TODO exit early
             if !can_match || neighbor.len() > max_length {
                 continue;
             }
