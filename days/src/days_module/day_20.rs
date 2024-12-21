@@ -5,8 +5,9 @@ use helpers::{grid::grid::Grid, manhattan_distance};
 use crate::days_module::day::Day;
 
 /* It is a single track, so we can build a table of steps with DFS.
- * Each cheat must start from the original track, and end on the original track, and have a Manhattan distance of two.
- * The time save is the difference in the table between the start and end.
+
+Each cheat must start from the original track, and end on the original track, and have a Manhattan distance of two.
+The time save is the difference in the table between the start and end.
 */
 
 fn solve(input: &String, duration: usize) -> usize {
