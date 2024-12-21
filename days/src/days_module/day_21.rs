@@ -29,6 +29,9 @@ I think the branching is not crucial, because for the arrow keypads there is no 
 Also, something recursive? I think part 2 will add more layers of keypads.
 */
 
+// TODO: The key is to realize that the optimal sequence is to either to move to the target first column and then finally to the row or vice versa, leaving only two possible sequences to consider, neither of which you can rule out locally.
+
+
 lazy_static! {
     static ref DIRECTION_PAD_TRANSITIONS: HashMap<(char, char), Vec<char>> = HashMap::from([
         (('<', '^'), vec!['>', '^', 'A']),
