@@ -158,7 +158,9 @@ impl Day for Day21 {
             .lines()
             .map(|line| enter_code(line).len() * line[0..(line.len() - 1)].parse::<usize>().unwrap())
             .sum::<usize>()
-            .to_string()
+            .to_string();
+
+        "".to_string()
     }
 
     fn part_b(&self, input: &String) -> String {
