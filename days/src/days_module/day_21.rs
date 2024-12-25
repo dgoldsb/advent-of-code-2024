@@ -31,7 +31,6 @@ Also, something recursive? I think part 2 will add more layers of keypads.
 
 // TODO: The key is to realize that the optimal sequence is to either to move to the target first column and then finally to the row or vice versa, leaving only two possible sequences to consider, neither of which you can rule out locally.
 
-
 lazy_static! {
     static ref DIRECTION_PAD_TRANSITIONS: HashMap<(char, char), Vec<char>> = HashMap::from([
         (('<', '^'), vec!['>', '^', 'A']),
@@ -79,7 +78,10 @@ lazy_static! {
 }
 
 fn resolve_robot_chain(target_without_start: &Vec<char>, layers_left: usize) -> Vec<char> {
-    println!("Target for robot {}: {:?}", layers_left, target_without_start);
+    println!(
+        "Target for robot {}: {:?}",
+        layers_left, target_without_start
+    );
     let mut target = vec!['A'];
     target.extend_from_slice(target_without_start);
     let mut result = Vec::new();
@@ -91,10 +93,7 @@ fn resolve_robot_chain(target_without_start: &Vec<char>, layers_left: usize) -> 
 
     // If necessary, go a layer deeper.
     if layers_left != 0 {
-        resolve_robot_chain(
-            &result,
-            layers_left - 1,
-        )
+        resolve_robot_chain(&result, layers_left - 1)
     } else {
         result
     }
@@ -156,7 +155,9 @@ impl Day for Day21 {
     fn part_a(&self, input: &String) -> String {
         input
             .lines()
-            .map(|line| enter_code(line).len() * line[0..(line.len() - 1)].parse::<usize>().unwrap())
+            .map(|line| {
+                enter_code(line).len() * line[0..(line.len() - 1)].parse::<usize>().unwrap()
+            })
             .sum::<usize>()
             .to_string();
 
