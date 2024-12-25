@@ -8,7 +8,7 @@ impl Day for Day25 {
     }
 
     fn get_index(&self) -> u8 {
-        1
+        25
     }
     fn part_a(&self, input: &String) -> String {
         "".to_string()
